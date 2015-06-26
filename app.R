@@ -54,7 +54,7 @@ app_tab <- tabItem(tabName = "app",
 		column(width = 1),
 		column(width = 10, 
 			conditionalPanel("input.do > 0",
-				box(width = NULL, title = "結果", solidHeader = TRUE, status = "warning", collapsible = TRUE,
+				box(width = NULL, title = "結果", solidHeader = TRUE, status = "primary", collapsible = TRUE,
 					plotOutput("result")
 				)
 			)
@@ -105,7 +105,7 @@ ui <- dashboardPage(header, sidebar, body)
 server <- function(input, output, session) {
 	data <- read.csv("data/sample_data.csv", fileEncoding = "sjis")
 	data_model <- data.frame(class = NA, select(data, age:hip))
-	colnames(data_model) <- c("class", "年齢", "身長", "体重", "バスト", "ウエスト", "ヒップ")
+	colnames(data_model) <- c("class", "age", "height", "weight", "bust", "waist", "hip")
 
 	pager <- reactiveValues(p = 1)
   class <- reactiveValues(class = 0)
@@ -174,6 +174,7 @@ server <- function(input, output, session) {
 		data_model <- na.omit(data_model)
 		data_model$class <- as.factor(data_model$class)
 		fit <- rpart(class ~., data = data_model, method = "class")
+		print(fit)
 		output$result <- renderPlot({
 			rpart.plot(fit, type = 1, extra = 1, under = TRUE)
 		})			
