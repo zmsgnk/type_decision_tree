@@ -3,6 +3,7 @@ library(shiny)
 library(shinydashboard)
 library(rpart)
 library(rpart.plot)
+require(markdown)
 
 
 #################################################################
@@ -14,38 +15,37 @@ library(rpart.plot)
 header <- dashboardHeader(title = "好みのタイプ診断")
 
 sidebar <- dashboardSidebar(
-	# disable = TRUE
 	sidebarMenu(
 		menuItem("App", tabName = "app"),
 	  menuItem("Source code for app", icon = icon("github"),
    	   href = "https://github.com/zmsgnk/type_decision_tree"
-   	)
-    # tags$li(
-    #   a(href = "http://twitter.com/intent/tweet?text=女の子の好みを診断するアプリ&url=http://statdist.ksmzn.com/&via=ksmzn&hashtags=rshiny",
-    #     target = "_blank",
-    #     icon("twitter"),
-    #     onClick = "window.open(encodeURI(decodeURI(this.href)),
-    #       'tweetwindow',
-    #       'width=550, height=450, personalbar=0, toolbar=0, scrollbars=1, resizable=1'
-    #       ); return false;",
-    #     span('Tweet'),
-    #     tags$small(
-    #       class = paste0("badge pull-right bg-", 'light-blue'),
-    #       'Share'
-    #     )
-    #   )
-    # ),
-    # tags$li(
-    #   a( href = "http://www.facebook.com/sharer.php?u=http://statdist.ksmzn.com/&t=いろいろな確率分布のパラメータをいじくるアプリ",
-    #     target = "_blank",
-    #     icon("facebook"),
-    #     span('Facebook'),
-    #     tags$small(
-    #       class = paste0("badge pull-right bg-", 'light-blue'),
-    #       'Share'
-    #     )
-    #   )
-    # )
+   	),
+    tags$li(
+      a(href = "http://twitter.com/intent/tweet?text=女の子の好みを診断するアプリ&url=https://zmsgnk.shinyapps.io/type_decision_tree",
+        target = "_blank",
+        icon("twitter"),
+        onClick = "window.open(encodeURI(decodeURI(this.href)),
+          'tweetwindow',
+          'width=550, height=450, personalbar=0, toolbar=0, scrollbars=1, resizable=1'
+          ); return false;",
+        span('Tweet'),
+        tags$small(
+          class = paste0("badge pull-right bg-", 'light-blue'),
+          'Share'
+        )
+      )
+    ),
+    tags$li(
+      a( href = "http://www.facebook.com/sharer.php?u=https://zmsgnk.shinyapps.io/type_decision_tree&t=女の子の好みを診断するアプリ",
+        target = "_blank",
+        icon("facebook"),
+        span('Facebook'),
+        tags$small(
+          class = paste0("badge pull-right bg-", 'light-blue'),
+          'Share'
+        )
+      )
+    )
 	)
 )
 
@@ -65,7 +65,7 @@ app_tab <- tabItem(tabName = "app",
 	fluidRow(
 		column(width = 1),
 		column(width = 4,
-			box(width = NULL, solidHeader = TRUE, status = "warning",
+			box(width = NULL, solidHeader = TRUE, status = "primary",
  				actionButton("like", shiny::tagList("Good ", icon("thumbs-o-up"))),
 			  actionButton("dislike", shiny::tagList("Bad ", icon("thumbs-o-down"))),
 			  htmlOutput("progress"),
@@ -75,10 +75,10 @@ app_tab <- tabItem(tabName = "app",
 			)
 		),
 		column(width = 6, 
-			box(width = NULL, status = "warning", solidHeader = TRUE, 
+			box(width = NULL, status = "primary", solidHeader = TRUE, 
 				htmlOutput("profile")
 			), 
-			box(width = NULL, status = "warning", solidHeader = TRUE,
+			box(width = NULL, status = "primary", solidHeader = TRUE,
 				includeMarkdown("www/about.md")
 			)
 		), 
@@ -94,7 +94,7 @@ body <- dashboardBody(
 )
 
 
-ui <- dashboardPage(header, sidebar, body, skin = "yellow")
+ui <- dashboardPage(header, sidebar, body)
 
 
 #################################################################
