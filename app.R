@@ -17,9 +17,9 @@ sidebar <- dashboardSidebar(
 	# disable = TRUE
 	sidebarMenu(
 		menuItem("App", tabName = "app"),
-	  # menuItem("Source code for app", icon = icon("github"),
-   	#    href = "http://github.com/ksmzn/ShinyDistributionsApp"
-	  #  ),
+	  menuItem("Source code for app", icon = icon("github"),
+   	   href = "https://github.com/zmsgnk/type_decision_tree"
+   	)
     # tags$li(
     #   a(href = "http://twitter.com/intent/tweet?text=女の子の好みを診断するアプリ&url=http://statdist.ksmzn.com/&via=ksmzn&hashtags=rshiny",
     #     target = "_blank",
