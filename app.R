@@ -3,6 +3,7 @@ library(shiny)
 library(shinydashboard)
 library(rpart)
 library(rpart.plot)
+library(partykit)
 require(markdown)
 
 
@@ -11,7 +12,6 @@ require(markdown)
 # UI
 #
 #################################################################
-
 header <- dashboardHeader(title = "好みのタイプ診断")
 
 sidebar <- dashboardSidebar(
@@ -54,7 +54,7 @@ app_tab <- tabItem(tabName = "app",
 		column(width = 1),
 		column(width = 10, 
 			conditionalPanel("input.do > 0",
-				box(width = NULL, title = "結果", solidHeader = TRUE, status = "primary", collapsible = TRUE,
+				box(width = NULL, title = "結果", solidHeader = TRUE, status = "warning", collapsible = TRUE,
 					plotOutput("result")
 				)
 			)
@@ -65,9 +65,11 @@ app_tab <- tabItem(tabName = "app",
 	fluidRow(
 		column(width = 1),
 		column(width = 4,
-			box(width = NULL, solidHeader = TRUE, status = "primary",
- 				actionButton("like", shiny::tagList("Good ", icon("thumbs-o-up"))),
-			  actionButton("dislike", shiny::tagList("Bad ", icon("thumbs-o-down"))),
+			box(width = NULL, solidHeader = TRUE, status = "warning",
+		    tags$div(class = "my-box-body", 
+		      tags$button(id = "like", type = "button", class = "btn btn-success btn-lg btn-half-block action-button", list(label = shiny::tagList(tags$strong("Good "), icon("thumbs-o-up")))), 
+		      tags$button(id = "dislike", type = "button", class = "btn btn-danger btn-lg btn-half-block action-button", list(label = shiny::tagList(tags$strong("Bad "), icon("thumbs-o-down"))))
+		    ),
 			  htmlOutput("progress"),
 			  uiOutput("do_button"),
 			  hr(),
@@ -75,10 +77,10 @@ app_tab <- tabItem(tabName = "app",
 			)
 		),
 		column(width = 6, 
-			box(width = NULL, status = "primary", solidHeader = TRUE, 
+			box(width = NULL, status = "warning", solidHeader = TRUE, 
 				htmlOutput("profile")
 			), 
-			box(width = NULL, status = "primary", solidHeader = TRUE,
+			box(width = NULL, status = "warning", solidHeader = TRUE,
 				includeMarkdown("www/about.md")
 			)
 		), 
@@ -88,6 +90,9 @@ app_tab <- tabItem(tabName = "app",
 
 
 body <- dashboardBody(
+  tags$head(
+    tags$link(rel = 'stylesheet', type = 'text/css', href = 'styles.css')
+  ),  
 	tabItems(
 		app_tab
 	)
@@ -108,7 +113,6 @@ server <- function(input, output, session) {
 	colnames(data_model) <- c("class", "age", "height", "weight", "bust", "waist", "hip")
 
 	pager <- reactiveValues(p = 1)
-  class <- reactiveValues(class = 0)
 
   observeEvent(input$like, {
   	data_model[pager$p, "class"] <<- "Good"
@@ -126,7 +130,7 @@ server <- function(input, output, session) {
 
   output$do_button <- renderUI({
   	if (pager$p >= 20) {
-  		tags$button(id = "do", type = "button", class = "btn btn-primary btn-lg btn-block action-button", list(label = "診断する"))
+  		tags$button(id = "do", type = "button", class = "btn btn-primary btn-lg btn-block action-button", list(label = tags$strong("診断する")))
   	} else {
 		  helpText("少なくとも20人ほどのデータが必要です。")
   	}
@@ -146,10 +150,6 @@ server <- function(input, output, session) {
 		shiny::tagList(
 			tags$h3("プロフィール"),
 			tags$table(class = "table", 
-				# tags$tr(
-				# 	tags$td("名前: "),
-				# 	tags$td(data[pager$p, "name"])
-				# ),
 				tags$tr(
 					tags$td("年齢: "),
 					tags$td(paste0(data[pager$p, "age"], "歳"))
@@ -170,13 +170,31 @@ server <- function(input, output, session) {
 		)
 	})
 
+	extractNodeInfo <- function(fit) {
+	  splits <- fit$splits %>%
+	    as.data.frame %>%
+	    filter(count > 0) %>%
+	    group_by(count) %>% 
+	    slice(1) %>%
+	    as.data.frame %>%
+	    arrange(desc(count))
+	  
+	  frame <- fit$frame
+	  frame <- frame[frame$var != "<leaf>", ]
+	  
+	  node_info <- merge(frame, splits, by.x = "n", by.y = "count")
+	  node_info[order(node_info$n, decreasing = TRUE), ]
+	}
+	
 	observeEvent(input$do, {
 		data_model <- na.omit(data_model)
 		data_model$class <- as.factor(data_model$class)
 		fit <- rpart(class ~., data = data_model, method = "class")
-		print(fit)
+		print(fit)		
+		node_info <- extractNodeInfo(fit)
+		print(node_info)
 		output$result <- renderPlot({
-			rpart.plot(fit, type = 1, extra = 1, under = TRUE)
+		  plot(as.party(fit))
 		})			
 	})
 
