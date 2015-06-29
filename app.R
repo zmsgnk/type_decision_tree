@@ -170,7 +170,23 @@ server <- function(input, output, session) {
 		)
 	})
 
+	
+	makeTree <- function(data) {
+	  rpart(class ~., data = data, method = "class")
+	}
+	
+	tryMakeTree <- function(data) {
+	  e <- try(makeTree(data), silent = FALSE)
+	  if (class(e) == "try-error") {
+	    return(NULL)
+	  } else {
+	    return(e)
+	  }
+	}
+	
 	extractNodeInfo <- function(fit) {
+	  if(is.null(fit$splits)) return()
+	  
 	  splits <- fit$splits %>%
 	    as.data.frame %>%
 	    filter(count > 0) %>%
@@ -189,11 +205,15 @@ server <- function(input, output, session) {
 	observeEvent(input$do, {
 		data_model <- na.omit(data_model)
 		data_model$class <- as.factor(data_model$class)
-		fit <- rpart(class ~., data = data_model, method = "class")
-		print(fit)		
-		node_info <- extractNodeInfo(fit)
-		print(node_info)
+	  fit <- tryMakeTree(data_model)
+    print(fit)
+    node_info <- extractNodeInfo(fit)
+    print(node_info)
+    
 		output$result <- renderPlot({
+		  validate({
+		    need(!is.null(fit$splits), "正常に計算が終了出来ませんでした。「Good」と「Bad」の数がだいたい同じくらいになるのが好ましいです。")
+		  })
 		  plot(as.party(fit))
 		})			
 	})
