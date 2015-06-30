@@ -8,6 +8,7 @@ require(markdown)
 library(stringr)
 library(foreach)
 library(tidyr)
+library(iterators)
 
 
 #################################################################
@@ -197,29 +198,29 @@ server <- function(input, output, session) {
 	  }
 	  result_text <- function() {
 	    if (path[1] == "age" & path[3] == "lt") {
-	      "若い"
+	      c("年齢が", "若い")
 	    } else if (path[1] == "age" & path[3] == "gte") {
-	      "大人っぽい"
+	      c("年齢が", "大人っぽい")
 	    } else if (path[1] == "height" & path[3] == "lt") {
-	      "背の低い"
+	      c("身長が", "背の低い")
 	    } else if (path[1] == "height" & path[3] == "gte") {
-	      "背の高い"
+	      c("身長が", "背の高い")
 	    } else if (path[1] == "weight" & path[3] == "lt") {
-	      "体重の軽い"
+	      c("体重が", "体重の軽い")
 	    } else if (path[1] == "weight" & path[3] == "gte") {
-	      "体重の重い"
+	      c("体重が", "体重の重い")
 	    } else if (path[1] == "waist" & path[3] == "lt") {
-	      "ウエストの細い"
+	      c("ウエストが", "ウエストの細い")
 	    } else if (path[1] == "waist" & path[3] == "gte") {
-	      "ウエストの太い"
+	      c("ウエストが", "ウエストの太い")
 	    } else if (path[1] == "hip" & path[3] == "lt") {
-	      "ヒップが小さい"
+	      c("おしりが", "おしりが小さい")
 	    } else if (path[1] == "hip" & path[3] == "gte") {
-	      "ヒップが大きい"
+	      c("おしりが", "おしりが大きい")
 	    } else if (path[1] == "bust" & path[3] == "lt") {
-	      "バストが小さい"
+	      c("バストが", "バストが小さい")
 	    } else if (path[1] == "bust" & path[3] == "gte") {
-	      "バストが大きい"
+	      c("バストが", "バストが大きい")
 	    }
 	  }
 	  result_text()
@@ -233,7 +234,7 @@ server <- function(input, output, session) {
 	  node <- as.integer(rownames(frame)[i])
 	  ## パスを抜き出す
 	  path <- path.rpart(fit, node)[[1]]
-	  foreach(p = path, .combine = c) %do% {
+	  foreach(p = path, .combine = rbind) %do% {
 	    parseNodePath(p)
 	  }
 	}
@@ -253,9 +254,19 @@ server <- function(input, output, session) {
 		})
 		
 		output$result_text <- renderUI({
-      result_text <- extractNodePath(fit)
-      print(result_text)
-      result_text <- paste0(unique(result_text), collapse = "、")
+      result_text <- extractNodePath(fit) %>% as.data.frame
+      names(result_text) <- c("part", "text")
+      result_text <- result_text %>%
+        mutate(part = as.character(part), 
+               text = as.character(text))
+
+      num_part <- result_text %>% count(part) %>% filter(n > 1)
+      foreach(i = icount(nrow(num_part))) %do% {
+        multi_part <- num_part[i, "part"] %>% as.character
+        result_text <- result_text %>%
+          mutate(text = ifelse(part == multi_part, paste0(multi_part, "ほどほどな"), text))
+      }
+      result_text <- paste0(unique(result_text$text), collapse = "、")
       result_text <- paste0(result_text, "女性が好きなようです。")
       tags$h2(result_text)
 		})
