@@ -5,6 +5,9 @@ library(rpart)
 library(rpart.plot)
 library(partykit)
 require(markdown)
+library(stringr)
+library(foreach)
+library(tidyr)
 
 
 #################################################################
@@ -54,8 +57,11 @@ app_tab <- tabItem(tabName = "app",
 		column(width = 1),
 		column(width = 10, 
 			conditionalPanel("input.do > 0",
-				box(width = NULL, title = "結果", solidHeader = TRUE, status = "warning", collapsible = TRUE,
-					plotOutput("result")
+			  box(width = NULL, title = "診断結果", solidHeader = TRUE, status = "warning", collapsible = TRUE,
+			    uiOutput("result_text")
+			  ), 
+				box(width = NULL, title = "グラフ", solidHeader = TRUE, status = "warning", collapsible = TRUE,
+					plotOutput("result_plot")
 				)
 			)
 		), 
@@ -170,7 +176,6 @@ server <- function(input, output, session) {
 		)
 	})
 
-	
 	makeTree <- function(data) {
 	  rpart(class ~., data = data, method = "class")
 	}
@@ -183,41 +188,78 @@ server <- function(input, output, session) {
 	    return(e)
 	  }
 	}
+
+	parseNodePath <- function(path) {
+	  if (str_detect(path, "< ")) {
+	    path <- c(str_split(path, "< ")[[1]], "lt")
+	  } else if (str_detect(path, ">=")) {
+	    path <- c(str_split(path, ">=")[[1]], "gte")
+	  }
+	  result_text <- function() {
+	    if (path[1] == "age" & path[3] == "lt") {
+	      "若い"
+	    } else if (path[1] == "age" & path[3] == "gte") {
+	      "大人っぽい"
+	    } else if (path[1] == "height" & path[3] == "lt") {
+	      "背の低い"
+	    } else if (path[1] == "height" & path[3] == "gte") {
+	      "背の高い"
+	    } else if (path[1] == "weight" & path[3] == "lt") {
+	      "体重の軽い"
+	    } else if (path[1] == "weight" & path[3] == "gte") {
+	      "体重の重い"
+	    } else if (path[1] == "waist" & path[3] == "lt") {
+	      "ウエストの細い"
+	    } else if (path[1] == "waist" & path[3] == "gte") {
+	      "ウエストの太い"
+	    } else if (path[1] == "hip" & path[3] == "lt") {
+	      "ヒップが小さい"
+	    } else if (path[1] == "hip" & path[3] == "gte") {
+	      "ヒップが大きい"
+	    } else if (path[1] == "bust" & path[3] == "lt") {
+	      "バストが小さい"
+	    } else if (path[1] == "bust" & path[3] == "gte") {
+	      "バストが大きい"
+	    }
+	  }
+	  result_text()
+	}
 	
-	extractNodeInfo <- function(fit) {
-	  if(is.null(fit$splits)) return()
-	  
-	  splits <- fit$splits %>%
-	    as.data.frame %>%
-	    filter(count > 0) %>%
-	    group_by(count) %>% 
-	    slice(1) %>%
-	    as.data.frame %>%
-	    arrange(desc(count))
-	  
+	extractNodePath <- function(fit) {
+	  ## Goodになる確率が一番高いnodeを抽出する
 	  frame <- fit$frame
-	  frame <- frame[frame$var != "<leaf>", ]
-	  
-	  node_info <- merge(frame, splits, by.x = "n", by.y = "count")
-	  node_info[order(node_info$n, decreasing = TRUE), ]
+	  good_prob <- as.data.frame(frame$yval2)$V5
+	  i <- which(good_prob == max(good_prob))
+	  node <- as.integer(rownames(frame)[i])
+	  ## パスを抜き出す
+	  path <- path.rpart(fit, node)[[1]]
+	  foreach(p = path, .combine = c) %do% {
+	    parseNodePath(p)
+	  }
 	}
 	
 	observeEvent(input$do, {
 		data_model <- na.omit(data_model)
 		data_model$class <- as.factor(data_model$class)
+		print(head(data_model))
 	  fit <- tryMakeTree(data_model)
     print(fit)
-    node_info <- extractNodeInfo(fit)
-    print(node_info)
-    
-		output$result <- renderPlot({
+
+		output$result_plot <- renderPlot({
 		  validate({
 		    need(!is.null(fit$splits), "正常に計算が終了出来ませんでした。「Good」と「Bad」の数がだいたい同じくらいになるのが好ましいです。")
 		  })
 		  plot(as.party(fit))
-		})			
+		})
+		
+		output$result_text <- renderUI({
+      result_text <- extractNodePath(fit)
+      print(result_text)
+      result_text <- paste0(unique(result_text), collapse = "、")
+      result_text <- paste0(result_text, "女性が好きなようです。")
+      tags$h2(result_text)
+		})
 	})
-
 }
 
 
