@@ -20,7 +20,8 @@ header <- dashboardHeader(title = tags$a("好みのタイプ診断", href = "htt
 
 sidebar <- dashboardSidebar(
 	sidebarMenu(
-		menuItem("外部リンク", tabName = "app"),
+		menuItem("リンク", tabName = "app"),
+		menuItem("トップページ", icon = icon("home"), href = "https://zmsgnk.shinyapps.io/type_decision_tree"), 
 		menuItem("サービスコンセプト", icon = icon("external-link"), href = "http://bds.datumstudio.jp/archives/1332"),
 		menuItem("運営会社", icon = icon("building-o"), href = "https://datumstudio.jp/"),
 	  menuItem("Source code for app", icon = icon("github"),
