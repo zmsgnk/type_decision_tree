@@ -254,6 +254,8 @@ server <- function(input, output, session) {
 		})
 		
 		output$result_text <- renderUI({
+		  if (unique(data_model$class) == "Bad") return(tags$h2("もしかして男性が好きですか？"))
+		  
       result_text <- extractNodePath(fit) %>% as.data.frame
       names(result_text) <- c("part", "text")
       result_text <- result_text %>%
@@ -268,7 +270,7 @@ server <- function(input, output, session) {
       }
       result_text <- paste0(unique(result_text$text), collapse = "、")
       result_text <- paste0(result_text, "女性が好きなようです。")
-      tags$h2(result_text)
+      return(tags$h2(result_text))
 		})
 	})
 }
