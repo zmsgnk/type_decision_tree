@@ -23,7 +23,8 @@ sidebar <- dashboardSidebar(
 		menuItem("App", tabName = "app"),
 	  menuItem("Source code for app", icon = icon("github"),
    	   href = "https://github.com/zmsgnk/type_decision_tree"
-   	)
+   	), 
+		menuItem("サービスコンセプト", icon = icon("external-link"), href = "http://bds.datumstudio.jp/archives/1332")
 		# menuItem(uiOutput("twitter")),
 		# menuItem(uiOutput("facebook"))
 	)
