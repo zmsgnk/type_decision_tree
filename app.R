@@ -16,7 +16,7 @@ library(iterators)
 # UI
 #
 #################################################################
-header <- dashboardHeader(title = "好みのタイプ診断")
+header <- dashboardHeader(title = tags$a("好みのタイプ診断", href = "/"))
 
 sidebar <- dashboardSidebar(
 	sidebarMenu(

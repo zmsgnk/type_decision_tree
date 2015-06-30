@@ -6,3 +6,23 @@
   text-align: center;
   border-radius: 0 0 3px 3px;
 }
+
+.logo a:link {
+  color: #fff;
+  text-decoration: none;
+}
+
+.logo a:visited {
+  color: #fff;
+  text-decoration: none;
+}
+
+.logo a:hover {
+  color: #fff;
+  text-decoration: none;
+}
+
+.logo a:active {
+  color: #fff;
+  text-decoration: none;
+}
