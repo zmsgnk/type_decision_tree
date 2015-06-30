@@ -26,3 +26,39 @@
   color: #fff;
   text-decoration: none;
 }
+
+a.facebook-iine{
+  width:100%;
+  padding:10px 0;
+  color:#fff;
+  text-align:center;
+  background-color:#3b5998;
+  height:50px;
+  display:block;
+  text-decoration:none;
+  font-size:20px;
+  float:left;
+  margin-bottom:3px;
+}
+ 
+a.facebook-iine:hover{
+  background-color:#6277a1;
+}
+ 
+a.twitter-tweet{
+  width:100%;
+  padding:10px 0;
+  color:#fff;
+  text-align:center;
+  background-color:#00acee;
+  height:50px;
+  display:block;
+  text-decoration:none;
+  font-size:20px;
+  float:left;
+  margin-bottom:3px;
+}
+ 
+a.twitter-tweet:hover{
+  background-color:#6aafca;
+}

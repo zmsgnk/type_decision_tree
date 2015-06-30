@@ -23,9 +23,9 @@ sidebar <- dashboardSidebar(
 		menuItem("App", tabName = "app"),
 	  menuItem("Source code for app", icon = icon("github"),
    	   href = "https://github.com/zmsgnk/type_decision_tree"
-   	),
-		menuItem(uiOutput("twitter")),
-		menuItem(uiOutput("facebook"))
+   	)
+		# menuItem(uiOutput("twitter")),
+		# menuItem(uiOutput("facebook"))
 	)
 )
 
@@ -34,6 +34,18 @@ app_tab <- tabItem(tabName = "app",
 		column(width = 1),
 		column(width = 10, 
 			conditionalPanel("input.do > 0",
+			  fluidRow(
+			    column(width = 6,
+			      box(width = NULL, 
+			        uiOutput("twitter")
+			      )
+			    ),
+			    column(width = 6,
+            box(width = NULL,
+			        uiOutput("facebook")
+			      )
+			    )
+			  ),
 			  box(width = NULL, title = "診断結果", solidHeader = TRUE, status = "warning", collapsible = TRUE,
 			    uiOutput("result_text")
 			  ), 
@@ -256,30 +268,25 @@ server <- function(input, output, session) {
 		})
 		
 		output$twitter <- renderUI({
-		  tags$li(
-		    a(href = sprintf("http://twitter.com/intent/tweet?text=【女性の好み診断】%%0a%%0aあなたは、「%s」%%0a%%0a&url=https://zmsgnk.shinyapps.io/type_decision_tree", result_text),
-		      target = "_blank",
-		      icon("twitter"),
-		      onClick = "window.open(encodeURI(decodeURI(this.href)),
-	          'tweetwindow',
-	          'width=550, height=450, personalbar=0, toolbar=0, scrollbars=1, resizable=1'
-	          ); return false;",
-		      span('結果をシェア')
-		    )
+		  tags$a(href = sprintf("http://twitter.com/intent/tweet?text=【女性の好み診断】%%0a%%0aあなたは、「%s」%%0a%%0a&url=https://zmsgnk.shinyapps.io/type_decision_tree", result_text),
+		         target = "_blank", 
+		         class = "twitter-tweet",
+		         icon("twitter"),
+		         onClick = "window.open(encodeURI(decodeURI(this.href)),'tweetwindow','width=550, height=450, personalbar=0, toolbar=0, scrollbars=1, resizable=1'); return false;",
+		         tags$span(tags$strong('結果をシェア'))
 		  )
 		})
 		
 		output$facebook <- renderUI({
-		  tags$li(
-		    a(href = sprintf("http://www.facebook.com/dialog/feed?app_id=392319910975259&redirect_uri=https://zmsgnk.shinyapps.io/type_decision_tree&link=https://zmsgnk.shinyapps.io/type_decision_tree&description=女性の好みをデータから診断！！&name=「%s」&picture=http://bds.datumstudio.jp/wp-content/uploads/koukoku3.jpg", result_text), 
-		    	target = "_blank",
-		    	icon("facebook"),
-		    	span("結果をシェア")
-		    )
+		  tags$a(href = sprintf("http://www.facebook.com/dialog/feed?app_id=392319910975259&redirect_uri=https://zmsgnk.shinyapps.io/type_decision_tree&link=https://zmsgnk.shinyapps.io/type_decision_tree&description=女性の好みをデータから診断！！&name=「%s」&picture=http://bds.datumstudio.jp/wp-content/uploads/koukoku3.jpg", result_text), 
+		      target = "_blank",
+		      class = "facebook-iine",
+		      icon("facebook"),
+		      tags$span(tags$strong("結果をシェア"))
 		  )
 		})
+		
 	})
-	
 }
 
 
