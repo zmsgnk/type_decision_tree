@@ -21,12 +21,11 @@ header <- dashboardHeader(title = tags$a("好みのタイプ診断", href = "htt
 sidebar <- dashboardSidebar(
 	sidebarMenu(
 		menuItem("App", tabName = "app"),
+		menuItem("サービスコンセプト", icon = icon("external-link"), href = "http://bds.datumstudio.jp/archives/1332"),
+		menuItem("運営会社", icon = icon("building-o"), href = "https://datumstudio.jp/"),
 	  menuItem("Source code for app", icon = icon("github"),
    	   href = "https://github.com/zmsgnk/type_decision_tree"
-   	), 
-		menuItem("サービスコンセプト", icon = icon("external-link"), href = "http://bds.datumstudio.jp/archives/1332")
-		# menuItem(uiOutput("twitter")),
-		# menuItem(uiOutput("facebook"))
+   	) 
 	)
 )
 
@@ -252,7 +251,7 @@ server <- function(input, output, session) {
       result_text <- paste0(unique(result_text$text), collapse = "、")
       result_text <- paste0(result_text, "女性が好きなようです。")		    
     } else if (unique(data_model$class) == "Bad") {
-      result_text <- "もしかして男性が好きなのですか？。"
+      result_text <- "もしかして男性が好きなのですか？"
     } else {
       result_text <- "女性が好きなようです。"
     }
@@ -269,7 +268,7 @@ server <- function(input, output, session) {
 		})
 		
 		output$twitter <- renderUI({
-		  tags$a(href = sprintf("http://twitter.com/intent/tweet?text=【女性の好み診断】%%0a%%0aあなたは、「%s」%%0a%%0a&url=https://zmsgnk.shinyapps.io/type_decision_tree", result_text),
+		  tags$a(href = sprintf("http://twitter.com/intent/tweet?text=【女性の好み診断】「%s」&url=http://bds.datumstudio.jp/archives/1332", result_text),
 		         target = "_blank", 
 		         class = "twitter-tweet",
 		         icon("twitter"),
