@@ -21,9 +21,9 @@ header <- dashboardHeader(title = tags$a("好みのタイプ診断", href = "htt
 sidebar <- dashboardSidebar(
 	sidebarMenu(
 		menuItem("リンク", tabName = "app"),
-		menuItem("トップページ", icon = icon("home"), href = "https://zmsgnk.shinyapps.io/type_decision_tree"), 
-		menuItem("サービスコンセプト", icon = icon("external-link"), href = "http://bds.datumstudio.jp/archives/1332"),
-		menuItem("運営会社", icon = icon("building-o"), href = "https://datumstudio.jp/"),
+		tags$li(tags$a(href = "https://zmsgnk.shinyapps.io/type_decision_tree", icon("home"), span("トップページ"))),
+		menuItem("サービスコンセプト", icon = icon("external-link"), href = "http://bds.datumstudio.jp/archives/1332?utm_source=from_shindan&utm_medium=link&utm_campaign=from_shindan"),
+		menuItem("運営会社", icon = icon("building-o"), href = "https://datumstudio.jp/?utm_source=from_shindan&utm_medium=link&utm_campaign=from_shindan"),
 	  menuItem("Source code for app", icon = icon("github"),
    	   href = "https://github.com/zmsgnk/type_decision_tree"
    	) 
@@ -231,12 +231,15 @@ server <- function(input, output, session) {
 	observeEvent(input$do, {
 		data_model <- na.omit(data_model)
 		data_model$class <- as.factor(data_model$class)
-		print(head(data_model))
+		print(data_model)
+		print(unique(data_model$class))
 	  fit <- tryMakeTree(data_model)
     print(fit)
+    print(fit$splits)
+    print(fit$frame)
     
     result_text <- NULL
-    if (!is.null(fit)) {
+    if (!is.null(fit$frame) && nrow(fit$frame) >= 2) {
       result_text <- extractNodePath(fit) %>% as.data.frame
       names(result_text) <- c("part", "text")
       result_text <- result_text %>%
@@ -246,12 +249,15 @@ server <- function(input, output, session) {
       num_part <- result_text %>% count(part) %>% filter(n > 1)
       foreach(i = icount(nrow(num_part))) %do% {
         multi_part <- num_part[i, "part"] %>% as.character
-        result_text <- result_text %>%
-          mutate(text = ifelse(part == multi_part, paste0(multi_part, "ほどほどな"), text))
+        text <- filter(result_text, part == multi_part)
+        if (length(unique(text$text)) > 1) {
+          result_text <- result_text %>%
+            mutate(text = ifelse(part == multi_part, paste0(multi_part, "ほどほどな"), text))
+        }
       }
       result_text <- paste0(unique(result_text$text), collapse = "、")
       result_text <- paste0(result_text, "女性が好きなようです。")		    
-    } else if (unique(data_model$class) == "Bad") {
+    } else if (length(unique(data_model$class)) == 1 && unique(data_model$class) == "Bad") {
       result_text <- "もしかして男性が好きなのですか？"
     } else {
       result_text <- "女性が好きなようです。"
@@ -259,7 +265,7 @@ server <- function(input, output, session) {
         
 		output$result_plot <- renderPlot({
 		  validate({
-		    need(!is.null(fit$splits), "正常に計算が終了出来ませんでした。「Good」と「Bad」の数がだいたい同じくらいになるのが好ましいです。")
+		    need(!is.null(fit) & nrow(fit$frame) >= 2, "正常に計算が終了出来ませんでした。「Good」と「Bad」の数がだいたい同じくらいになるのが好ましいです。")
 		  })
 		  plot(as.party(fit))
 		})
