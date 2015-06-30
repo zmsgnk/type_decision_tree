@@ -24,32 +24,8 @@ sidebar <- dashboardSidebar(
 	  menuItem("Source code for app", icon = icon("github"),
    	   href = "https://github.com/zmsgnk/type_decision_tree"
    	),
-    tags$li(
-      a(href = "http://twitter.com/intent/tweet?text=女の子の好みを診断するアプリ&url=https://zmsgnk.shinyapps.io/type_decision_tree",
-        target = "_blank",
-        icon("twitter"),
-        onClick = "window.open(encodeURI(decodeURI(this.href)),
-          'tweetwindow',
-          'width=550, height=450, personalbar=0, toolbar=0, scrollbars=1, resizable=1'
-          ); return false;",
-        span('Tweet'),
-        tags$small(
-          class = paste0("badge pull-right bg-", 'light-blue'),
-          'Share'
-        )
-      )
-    ),
-    tags$li(
-      a( href = "http://www.facebook.com/sharer.php?u=https://zmsgnk.shinyapps.io/type_decision_tree&t=女の子の好みを診断するアプリ",
-        target = "_blank",
-        icon("facebook"),
-        span('Facebook'),
-        tags$small(
-          class = paste0("badge pull-right bg-", 'light-blue'),
-          'Share'
-        )
-      )
-    )
+		menuItem(uiOutput("twitter")),
+		menuItem(uiOutput("facebook"))
 	)
 )
 
@@ -106,7 +82,7 @@ body <- dashboardBody(
 )
 
 
-ui <- dashboardPage(header, sidebar, body)
+ui <- dashboardPage(header, sidebar, body, title = "女の子の好みを診断")
 
 
 #################################################################
@@ -245,7 +221,29 @@ server <- function(input, output, session) {
 		print(head(data_model))
 	  fit <- tryMakeTree(data_model)
     print(fit)
-
+    
+    result_text <- NULL
+    if (!is.null(fit)) {
+      result_text <- extractNodePath(fit) %>% as.data.frame
+      names(result_text) <- c("part", "text")
+      result_text <- result_text %>%
+        mutate(part = as.character(part), 
+               text = as.character(text))
+      
+      num_part <- result_text %>% count(part) %>% filter(n > 1)
+      foreach(i = icount(nrow(num_part))) %do% {
+        multi_part <- num_part[i, "part"] %>% as.character
+        result_text <- result_text %>%
+          mutate(text = ifelse(part == multi_part, paste0(multi_part, "ほどほどな"), text))
+      }
+      result_text <- paste0(unique(result_text$text), collapse = "、")
+      result_text <- paste0(result_text, "女性が好きなようです。")		    
+    } else if (unique(data_model$class) == "Bad") {
+      result_text <- "もしかして男性が好きなのですか？。"
+    } else {
+      result_text <- "女性が好きなようです。"
+    }
+        
 		output$result_plot <- renderPlot({
 		  validate({
 		    need(!is.null(fit$splits), "正常に計算が終了出来ませんでした。「Good」と「Bad」の数がだいたい同じくらいになるのが好ましいです。")
@@ -254,25 +252,35 @@ server <- function(input, output, session) {
 		})
 		
 		output$result_text <- renderUI({
-		  if (unique(data_model$class) == "Bad") return(tags$h2("もしかして男性が好きですか？"))
-		  
-      result_text <- extractNodePath(fit) %>% as.data.frame
-      names(result_text) <- c("part", "text")
-      result_text <- result_text %>%
-        mutate(part = as.character(part), 
-               text = as.character(text))
-
-      num_part <- result_text %>% count(part) %>% filter(n > 1)
-      foreach(i = icount(nrow(num_part))) %do% {
-        multi_part <- num_part[i, "part"] %>% as.character
-        result_text <- result_text %>%
-          mutate(text = ifelse(part == multi_part, paste0(multi_part, "ほどほどな"), text))
-      }
-      result_text <- paste0(unique(result_text$text), collapse = "、")
-      result_text <- paste0(result_text, "女性が好きなようです。")
-      return(tags$h2(result_text))
+		  tags$h2(result_text)
+		})
+		
+		output$twitter <- renderUI({
+		  href_text <- 
+		  tags$li(
+		    a(href = sprintf("http://twitter.com/intent/tweet?text=【女の子の好み診断】%%0a%%0aあなたは、「%s」%%0a%%0a&url=https://zmsgnk.shinyapps.io/type_decision_tree", result_text),
+		      target = "_blank",
+		      icon("twitter"),
+		      onClick = "window.open(encodeURI(decodeURI(this.href)),
+	          'tweetwindow',
+	          'width=550, height=450, personalbar=0, toolbar=0, scrollbars=1, resizable=1'
+	          ); return false;",
+		      span('結果をシェア')
+		    )
+		  )
+		})
+		
+		output$facebook <- renderUI({
+		  tags$li(
+		    a(href = "http://www.facebook.com/sharer.php?u=https://zmsgnk.shinyapps.io/type_decision_tree&t=女の子の好みを診断するアプリ",
+		      target = "_blank",
+		      icon("facebook"),
+		      span('結果をシェア')
+		    )
+		  )
 		})
 	})
+	
 }
 
 
