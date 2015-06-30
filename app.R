@@ -82,7 +82,7 @@ body <- dashboardBody(
 )
 
 
-ui <- dashboardPage(header, sidebar, body, title = "女の子の好みを診断")
+ui <- dashboardPage(header, sidebar, body, title = "女性の好みを診断")
 
 
 #################################################################
@@ -256,9 +256,8 @@ server <- function(input, output, session) {
 		})
 		
 		output$twitter <- renderUI({
-		  href_text <- 
 		  tags$li(
-		    a(href = sprintf("http://twitter.com/intent/tweet?text=【女の子の好み診断】%%0a%%0aあなたは、「%s」%%0a%%0a&url=https://zmsgnk.shinyapps.io/type_decision_tree", result_text),
+		    a(href = sprintf("http://twitter.com/intent/tweet?text=【女性の好み診断】%%0a%%0aあなたは、「%s」%%0a%%0a&url=https://zmsgnk.shinyapps.io/type_decision_tree", result_text),
 		      target = "_blank",
 		      icon("twitter"),
 		      onClick = "window.open(encodeURI(decodeURI(this.href)),
