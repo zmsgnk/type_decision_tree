@@ -271,10 +271,10 @@ server <- function(input, output, session) {
 		
 		output$facebook <- renderUI({
 		  tags$li(
-		    a(href = "http://www.facebook.com/sharer.php?u=https://zmsgnk.shinyapps.io/type_decision_tree&t=女の子の好みを診断するアプリ",
-		      target = "_blank",
-		      icon("facebook"),
-		      span('結果をシェア')
+		    a(href = sprintf("http://www.facebook.com/dialog/feed?app_id=392319910975259&redirect_uri=https://zmsgnk.shinyapps.io/type_decision_tree&link=https://zmsgnk.shinyapps.io/type_decision_tree&description=女性の好みをデータから診断！！&name=「%s」&picture=http://articleimage.nicoblomaga.jp/image/61/2015/c/6/c628ae88f87f0e791bd493ddb7d409f0521d835b1425375627.jpg", result_text), 
+		    	target = "_blank",
+		    	icon("facebook"),
+		    	span("結果をシェア")
 		    )
 		  )
 		})
