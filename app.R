@@ -16,12 +16,12 @@ library(iterators)
 # UI
 #
 #################################################################
-header <- dashboardHeader(title = tags$a("好みのタイプ診断", href = "https://zmsgnk.shinyapps.io/type_decision_tree"))
+header <- dashboardHeader(title = tags$a("好みのタイプ診断", href = "https://datumstudio.shinyapps.io/type_decision_tree"))
 
 sidebar <- dashboardSidebar(
 	sidebarMenu(
 		menuItem("リンク", tabName = "app"),
-		tags$li(tags$a(href = "https://zmsgnk.shinyapps.io/type_decision_tree", icon("home"), span("トップページ"))),
+		tags$li(tags$a(href = "https://datumstudio.shinyapps.io/type_decision_tree", icon("home"), span("トップページ"))),
 		menuItem("サービスコンセプト", icon = icon("external-link"), href = "http://bds.datumstudio.jp/archives/1332?utm_source=from_shindan&utm_medium=link&utm_campaign=from_shindan"),
 		menuItem("運営会社", icon = icon("building-o"), href = "https://datumstudio.jp/?utm_source=from_shindan&utm_medium=link&utm_campaign=from_shindan"),
 	  menuItem("Source code for app", icon = icon("github"),
@@ -285,7 +285,7 @@ server <- function(input, output, session) {
 		})
 		
 		output$facebook <- renderUI({
-		  tags$a(href = sprintf("http://www.facebook.com/dialog/feed?app_id=392319910975259&redirect_uri=https://zmsgnk.shinyapps.io/type_decision_tree&link=https://zmsgnk.shinyapps.io/type_decision_tree&description=女性の好みをデータから診断！！&name=「%s」&picture=http://bds.datumstudio.jp/wp-content/uploads/koukoku3.jpg", result_text), 
+		  tags$a(href = sprintf("http://www.facebook.com/dialog/feed?app_id=392319910975259&redirect_uri=https://datumstudio.shinyapps.io/type_decision_tree&link=https://datumstudio.shinyapps.io/type_decision_tree&description=女性の好みをデータから診断！！&name=「%s」&picture=http://bds.datumstudio.jp/wp-content/uploads/koukoku3.jpg", result_text), 
 		      target = "_blank",
 		      class = "facebook-iine",
 		      icon("facebook"),
